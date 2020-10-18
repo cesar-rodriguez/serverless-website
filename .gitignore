@@ -173,3 +173,5 @@ override.tf.json
 terraform.rc
 
 .vscode/
+
+*.ignore
