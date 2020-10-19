@@ -1,6 +1,3 @@
-# Used to get Account ID
-data "aws_caller_identity" "current" {}
-
 ### S3 Bucket hosting website
 variable "bucket_name" {}
 resource "aws_s3_bucket" "b" {
