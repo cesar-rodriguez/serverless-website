@@ -8,6 +8,7 @@ init () {
 plan () {
     VERSION=$1
     terraform plan \
+        -var "lambda_version=${VERSION}" \
         -detailed-exitcode \
         -out=out.tfplan \
         infrastructure
