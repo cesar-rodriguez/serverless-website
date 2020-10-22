@@ -25,21 +25,16 @@ resource "aws_s3_bucket_policy" "b" {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "GetObject",
+            "Sid": "Object",
             "Effect": "Deny",
             "Principal": "*",
             "Action": [
-                "s3:GetObject"
+                "s3:PutBucketWebsite"
             ],
             "Resource": [
                 "arn:aws:s3:::${var.bucket_name}",
                 "arn:aws:s3:::${var.bucket_name}/*"
-            ],
-            "Condition" : {
-                "StringNotEquals" : {
-                    "aws:SourceVpc": "${var.vpc}"
-                }
-            }
+            ]
         }
     ]
 }
