@@ -43,10 +43,13 @@ resource "aws_apigatewayv2_stage" "default" {
 
 # Log group for access logs
 resource "aws_cloudwatch_log_group" "log" {
-  name       = "${var.name}-logs"
+  name       = "${var.name}"
   kms_key_id = aws_kms_key.key.arn
 }
 
+output "cloudwatch_console" {
+  value = "https://${var.aws_region}.console.aws.amazon.com/cloudwatch/home?region=${var.aws_region}#logsV2:log-groups/log-group/${var.name}"
+}
 
 output "invoke_url" {
   value = aws_apigatewayv2_stage.default.invoke_url
