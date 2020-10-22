@@ -27,6 +27,9 @@ resource "aws_lambda_function" "serverless_web" {
   }
 }
 
+output "lambda_invoke_cmd" {
+  value = "aws lambda invoke --function-name ${var.name} --region ${var.aws_region} response.ignore"
+}
 
 ### IAM role for lambda function
 resource "aws_iam_role" "lambda_exec" {
