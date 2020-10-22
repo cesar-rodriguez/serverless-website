@@ -4,6 +4,10 @@ resource "aws_s3_bucket" "b" {
   bucket = var.bucket_name
   acl    = "private"
 
+  versioning {
+    enabled = true
+  }
+
   tags = {
     Name = var.bucket_name
   }
@@ -13,7 +17,6 @@ output "index_html" {
   value = "http://${aws_s3_bucket.b.bucket_domain_name}/index.html"
 }
 
-/*
 resource "aws_s3_bucket_policy" "b" {
   bucket = aws_s3_bucket.b.id
 
@@ -22,21 +25,27 @@ resource "aws_s3_bucket_policy" "b" {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "PublicReadGetObject",
-            "Effect": "Allow",
+            "Sid": "GetObject",
+            "Effect": "Deny",
             "Principal": "*",
             "Action": [
                 "s3:GetObject"
             ],
             "Resource": [
+                "arn:aws:s3:::${var.bucket_name}",
                 "arn:aws:s3:::${var.bucket_name}/*"
-            ]
+            ],
+            "Condition" : {
+                "StringNotEquals" : {
+                    "aws:SourceVpc": "${var.vpc}"
+                }
+            }
         }
     ]
 }
 POLICY
 }
-*/
+
 resource "aws_s3_bucket_object" "html" {
   bucket       = aws_s3_bucket.b.bucket
   key          = "index.html"

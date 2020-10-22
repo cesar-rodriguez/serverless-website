@@ -1,6 +1,6 @@
 #!/bin/bash
 
-S3_BUCKET="cesar-serverless-website-staging"
+S3_BUCKET="terrascan-web-staging"
 
 package () {
     echo "Creating zip file"

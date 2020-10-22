@@ -1,12 +1,4 @@
-/*
-Docs:
-https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function
-
-Security issues to look for:
-- vpc_config - (Optional) Provide this to allow your function to access your VPC. Fields documented below. See Lambda in VPC
-
-- kms_key_arn - (Optional) Amazon Resource Name (ARN) of the AWS Key Management Service (KMS) key that is used to encrypt environment variables. If this configuration is not provided when environment variables are in use, AWS Lambda uses a default service key. If this configuration is provided when environment variables are not in use, the AWS Lambda API does not save this configuration and Terraform will show a perpetual difference of adding the key. To fix the perpetual difference, remove this configuration.
-*/
+### Lambda function
 resource "aws_lambda_function" "serverless_web" {
   function_name = var.name
 
@@ -16,7 +8,17 @@ resource "aws_lambda_function" "serverless_web" {
   handler = "main.lambda_handler"
   runtime = "python3.8"
 
-  role = aws_iam_role.lambda_exec.arn
+  role        = aws_iam_role.lambda_exec.arn
+  kms_key_arn = aws_kms_key.key.arn
+
+  vpc_config {
+    subnet_ids         = ["${var.subnet}"]
+    security_group_ids = ["${var.security_group}"]
+  }
+
+  tracing_config {
+    mode = "Active"
+  }
 
   environment {
     variables = {
@@ -60,7 +62,13 @@ resource "aws_iam_policy" "policy" {
       "Action": [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
-        "logs:PutLogEvents"
+        "logs:PutLogEvents",
+        "ec2:CreateNetworkInterface",
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:DeleteNetworkInterface",
+        "ec2:AssignPrivateIpAddresses",
+        "ec2:UnassignPrivateIpAddresses",
+        "xray:PutTraceSegments"
       ],
       "Effect": "Allow",
       "Resource": "*"
@@ -75,6 +83,35 @@ resource "aws_iam_policy" "policy" {
         "arn:aws:s3:::${var.bucket_name}",
         "arn:aws:s3:::${var.bucket_name}/*"
       ]
+    },
+    {
+      "Action": [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "${aws_kms_key.key.arn}"
+      ]
+    },
+    {
+      "Action": [
+        "kms:CreateGrant",
+        "kms:ListGrants",
+        "kms:RevokeGrant"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "${aws_kms_key.key.arn}"
+      ],
+      "Condition": {
+        "Bool": {
+          "kms:GrantIsForAWSResource": "true"
+        }
+      }
     }
   ]
 }
