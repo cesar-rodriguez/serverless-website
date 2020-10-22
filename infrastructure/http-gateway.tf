@@ -7,7 +7,7 @@ resource "aws_apigatewayv2_api" "web" {
     allow_credentials = false
     allow_headers     = []
     allow_methods     = ["GET"]
-    allow_origins     = []
+    allow_origins     = ["*"]
     expose_headers    = []
     max_age           = 3600
   }
@@ -33,20 +33,7 @@ resource "aws_apigatewayv2_stage" "default" {
   api_id      = aws_apigatewayv2_api.web.id
   name        = "$default"
   auto_deploy = "true"
-
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.log.arn
-    format          = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId"
-  }
 }
-
-
-# Log group for access logs
-resource "aws_cloudwatch_log_group" "log" {
-  name       = "${var.name}-logs"
-  kms_key_id = aws_kms_key.key.arn
-}
-
 
 output "invoke_url" {
   value = aws_apigatewayv2_stage.default.invoke_url
