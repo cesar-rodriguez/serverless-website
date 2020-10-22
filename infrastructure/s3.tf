@@ -2,10 +2,10 @@
 variable "bucket_name" {}
 resource "aws_s3_bucket" "b" {
   bucket = var.bucket_name
-  acl    = "private"
+  acl    = "public-read"
 
-  versioning {
-    enabled = true
+  website {
+    index_document = "index.html"
   }
 
   tags = {
@@ -25,21 +25,15 @@ resource "aws_s3_bucket_policy" "b" {
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "GetObject",
-            "Effect": "Deny",
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
             "Principal": "*",
             "Action": [
                 "s3:GetObject"
             ],
             "Resource": [
-                "arn:aws:s3:::${var.bucket_name}",
                 "arn:aws:s3:::${var.bucket_name}/*"
-            ],
-            "Condition" : {
-                "StringNotEquals" : {
-                    "aws:SourceVpc": "${var.vpc}"
-                }
-            }
+            ]
         }
     ]
 }
@@ -50,7 +44,7 @@ resource "aws_s3_bucket_object" "html" {
   bucket       = aws_s3_bucket.b.bucket
   key          = "index.html"
   source       = "${path.module}/static/index.html"
-  acl          = "private"
+  acl          = "public-read"
   content_type = "text/html"
   etag         = filemd5("${path.module}/static/index.html")
 }
@@ -59,7 +53,7 @@ resource "aws_s3_bucket_object" "logo" {
   bucket       = aws_s3_bucket.b.bucket
   key          = "/static/terrascan_logo.png"
   source       = "${path.module}/static/terrascan_logo.png"
-  acl          = "private"
+  acl          = "public-read"
   content_type = "image/png"
   etag         = filemd5("${path.module}/static/terrascan_logo.png")
 }
@@ -68,7 +62,7 @@ resource "aws_s3_bucket_object" "logo_dark" {
   bucket       = aws_s3_bucket.b.bucket
   key          = "/static/terrascan_logo_dark.png"
   source       = "${path.module}/static/terrascan_logo_dark.png"
-  acl          = "private"
+  acl          = "public-read"
   content_type = "image/png"
   etag         = filemd5("${path.module}/static/terrascan_logo_dark.png")
 }
